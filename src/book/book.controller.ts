@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post, Put, Request, UseGuards } from '@nestjs/common';
 import { BookService } from './book.service';
 import { UpdateBookDto } from 'src/dto/create-book.dto';
 import { UserService } from 'src/user/user.service';
+import { BorrowDto } from 'src/dto/borrow.dto';
 
 @Controller('book')
 export class BookController {
@@ -22,8 +23,8 @@ export class BookController {
     };
 
     @Get(':id')
-    findOne(@Param("id") id:number) {
-        return this.bookService.findOne(id);
+    findOneBook(@Param("id") id:number) {
+        return this.bookService.findOneBook(id);
     };
 
     //@UseGuards(JwtGuard)
@@ -35,12 +36,36 @@ export class BookController {
         }
     }
 
+    @Post('borrow/:id')
+    async borrow(@Param('id') userId: number, @Body() reqBody) {
+        const userCheck = await this.userService.userIdCheck(userId);
+
+        if (userCheck === false) {
+            throw new HttpException ('User Id not found!', HttpStatus.NOT_FOUND);
+        }
+
+        const bookId:number = reqBody.book_id;
+
+        const isBorrowed = await this.bookService.isBorrowed(bookId)
+        
+        if (isBorrowed) {            
+            throw new HttpException ('This book is already borrowed!', HttpStatus.NOT_ACCEPTABLE);
+        }
+
+        const dto: BorrowDto =  { userId, bookId };
+
+        return {
+            message: `book borrowed successfully`,
+            result: await this.bookService.borrow(dto)
+        }
+    }
+
     //@UseGuards(JwtGuard)
-    @Get('userbooks')
-    getBooksForUser(@Request() req) {
-        const user_id: number = req.user.userId;
-        return this.bookService.findBooksForUser(user_id);
-    };
+    // @Get('userbooks')
+    // getBooksForUser(@Request() req) {
+    //     const user_id: number = req.user.userId;
+    //     return this.bookService.findBooksForUser(user_id);
+    // };
 
     // //@UseGuards(JwtGuard)
     // @Delete(':id')

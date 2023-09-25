@@ -21,11 +21,17 @@ export class UserService {
         })
     }
 
-    async userIdCheck(id: number) {
-        return await this.findOne(id) ? true : false;
+    async userIdCheck(id: number): Promise<boolean> {
+        const user = await this.userRepo.findOne({
+            where: {
+                id: id
+            }
+        });
+        console.log(user);
+        return  user === null ? false : true;
     }
 
-    async findOne(id:number){
+    async findOne(id:number): Promise<User | undefined> {
         const user = await this.userRepo.findOne({
             where: {
                 id: id

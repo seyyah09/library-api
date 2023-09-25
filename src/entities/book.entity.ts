@@ -1,6 +1,7 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 import { User } from "./user.entity";
+import { Borrow } from "./borrow.entity";
 
 @Entity()
 export class Book {
@@ -16,9 +17,14 @@ export class Book {
     @Column({ unique: false, nullable: false })
     press: string;
 
-    @Column({ nullable: true })
-    review: number;
+    @ManyToMany(() => User, (user) => user.borrowedBooks)
+    @JoinColumn()
+    borrowers: User[];
+  
+    // Define one-to-many relationship with Borrow entity
+    @OneToMany(() => Borrow, (borrow) => borrow.book)
+    borrows: Borrow[];
 
     @Column({ nullable: true })
-    userId: number; //geçici olarak yazildi
+    review: number;
 }
