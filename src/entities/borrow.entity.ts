@@ -8,22 +8,20 @@ export class Borrow {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ unique: false, nullable: false })
-    bookId: number;
-
-    @Column({ unique: false, nullable: false })
-    userId: number;
-
-    @ManyToOne(() => User, (user) => user.borrows)
+    @ManyToOne(() => User, (user) => user.borrowedBooks)
     user: User;
   
     @ManyToOne(() => Book, (book) => book.borrowers)
     book: Book;
 
-    @CreateDateColumn()
+    @CreateDateColumn({type: 'timestamp'})
     borrowDate: Date;
 
-    @Column({ nullable: true })
+    @Column({ type: 'date', nullable: true})
     returnDate: Date;
+
+    @Column({ type: 'numeric', precision: 3, scale: 2, nullable: true })
+    review: number | null;
 }
+
   
