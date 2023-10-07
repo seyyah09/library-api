@@ -6,11 +6,11 @@ export class ReturnDto {
     userId: number;
 
     @IsNumber()
-    borrowId: number;
+    bookId: number;
 
     @IsNotEmpty()
     @IsNumber()
     @Min(1)
     @Max(10)
-    review: number;
+    score: number;
 }

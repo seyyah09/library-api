@@ -21,7 +21,7 @@ export class Borrow {
     returnDate: Date;
 
     @Column({ type: 'numeric', precision: 3, scale: 2, nullable: true })
-    review: number | null;
+    userScore: number | null;
 }
 
   

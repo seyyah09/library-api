@@ -26,11 +26,40 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-New Library Project with Nest
+Library API:
+
+For a library, managing its members and the borrowing of books by members
+An application has been developed for .
+
+The operations that can be performed through the application are listed below:
+
+● Creating a new user (id, name)
+
+● List users
+
+● Access a user's information (name, past books borrowed and current books borrowed)
+
+● Creating a new book (id, name)
+
+● List books
+
+● Accessing information about a book (name, average review score)
+
+● Borrowing books
+
+● Delivering books and giving review scores
+
+To fulfill these requirements, NestJs, a Node.js-based development environment with Typescript, was used.
+Postgres and TypeOrm were used for database operations.
 
 ## Progress
 
 21.09.2023 - Project started, user and task modules, controllers and services created. create user, create book, get user by id, get book by id, get all users, get all books.
+
+06.10.2023 - borrow and return(with review) book functionalities added
+
+07.10.2023 - project comleted
+
 
 ## Support
 

@@ -8,7 +8,6 @@ import { BorrowDto } from '../../src/dto/borrow.dto';
 import { User } from 'src/entities/user.entity';
 import { UserService } from 'src/user/user.service';
 import { ReturnDto } from 'src/dto/return.dto';
-import { isNotEmpty } from 'class-validator';
 
 @Injectable()
 export class BookService {
@@ -55,7 +54,17 @@ export class BookService {
         return book;
     }
 
-    async findBorrow(id:number){
+    async findBorrow(userId: number, bookId: number){
+        return await this.borrowRepo
+        .createQueryBuilder('borrow')
+        .leftJoinAndSelect('borrow.book', 'book')
+        .leftJoinAndSelect('borrow.user', 'user')
+        .where('borrow.userId = :userId', { userId })
+        .andWhere('borrow.bookId = :bookId', { bookId })
+        .getOne();
+    }
+
+    async findBorrowById(id: number){
         return await this.borrowRepo
         .createQueryBuilder('borrow')
         .leftJoinAndSelect('borrow.book', 'book')
@@ -76,7 +85,7 @@ export class BookService {
         const borrowedData = await this.borrowRepo.save(borrowData);
 
         const newBorrowId: number = borrowedData.id;
-        return this.findBorrow(newBorrowId);
+        return this.findBorrowById(newBorrowId);
     }
 
     async isBookAvailable(bookId: number) {
@@ -105,15 +114,16 @@ export class BookService {
     }
 
     async returnBook(returnDto: ReturnDto): Promise<Borrow> {
-        const borrowRecord = await this.findBorrow(returnDto.borrowId);
+        const borrowRecord = await this.findBorrow(returnDto.userId, returnDto.bookId);
+        const borrowId: number = borrowRecord.id;
     
         if (!borrowRecord) {
           throw new NotFoundException('No such borrow!');
-        }
+        };
 
         if (borrowRecord.returnDate) {
             throw new NotFoundException('This book already returned!');
-        }
+        };
 
         const userIdFromDB = await this.userService.findOne(returnDto.userId);
 
@@ -123,7 +133,7 @@ export class BookService {
     
         borrowRecord.returnDate = new Date();
 
-        borrowRecord.review = returnDto.review;
+        borrowRecord.userScore = returnDto.score;
     
         try {
           await this.borrowRepo.save(borrowRecord);
@@ -136,20 +146,20 @@ export class BookService {
         const bookRecord = await this.findOneBook(bookId); 
           
         if(bookRecord.reviewScore === -1) {
-            bookRecord.reviewScore = returnDto.review;
+            bookRecord.reviewScore = returnDto.score;
             await this.bookRepo.save(bookRecord);
         } else {
             bookRecord.reviewScore = await this.calculateAverageReviewScore(bookId);
             await this.bookRepo.save(bookRecord);            
         }
-        return await this.findBorrow(returnDto.borrowId);
+        return await this.findBorrowById(borrowId);
     }
 
     async calculateAverageReviewScore(bookId: number): Promise<number> {
         const result = await this.borrowRepo
           .createQueryBuilder('borrow')
           .where('borrow.bookId = :bookId', { bookId })
-          .select('AVG(borrow.review)', 'averageReview')
+          .select('AVG(borrow.score)', 'averageReview')
           .getRawOne();
     
         return result.averageReview;
